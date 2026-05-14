@@ -63,6 +63,16 @@ WORKDIR /home/vagrant/build/dev.davidv.translator
 # lengths depending on git version or repo status
 RUN git config --system core.abbrev 10
 
+# Allow git to operate on the mounted source tree even when the host
+# user's UID does not match the container's user. On native Linux Docker
+# the host UIDs are passed through to the container, so CMake's internal
+# `git submodule update --init` (in bergamot-translator/CMakeLists.txt)
+# aborts with "fatal: detected dubious ownership in repository" when the
+# repo on the host is not owned by the same UID running inside the
+# container. The wildcard makes the build work on Linux without forcing
+# every contributor to set safe.directory or override --user.
+RUN git config --system --add safe.directory '*'
+
 RUN echo "sdk.dir=${ANDROID_SDK_ROOT}" > local.properties
 RUN chmod a+rw -R $CARGO_HOME/registry
 RUN mkdir /.gradle && chmod a+rw /.gradle
