@@ -57,6 +57,14 @@ endif()
 if (ANDROID_ABI STREQUAL "armeabi-v7a")
   set(BUILD_ARCH "armv7-a" CACHE STRING "Build architecture" FORCE)
 endif ()
+if (ANDROID_ABI STREQUAL "x86_64")
+  # Pin x86_64 to the SSE2 baseline so the resulting .so runs on every
+  # Android x86_64 emulator regardless of the host hypervisor. Without
+  # this, the build host's native CPU features (e.g. AVX2) leak into the
+  # binary, which then crashes with SIGILL on WHPX/KVM emulators that do
+  # not expose AVX2.
+  set(BUILD_ARCH "x86-64" CACHE STRING "Build architecture" FORCE)
+endif ()
 
 # marian-dev builds some other targets
 set(COMPILE_LIBRARY_ONLY ON CACHE BOOL "" FORCE)
