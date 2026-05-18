@@ -73,6 +73,16 @@ RUN git config --system core.abbrev 10
 # every contributor to set safe.directory or override --user.
 RUN git config --system --add safe.directory '*'
 
+# Redirect the marian-dev submodule to the cgeo fork. bergamot-translator's
+# .gitmodules pins marian-dev to commit 02b99943c066321f7729b3431229ba1ff8ef95bb,
+# a fork-specific commit not reachable from any browsermt upstream ref; it only
+# survived as a loose object in DavidVentura/marian-dev. The cgeo fork anchors it
+# with a tag (pin_02b99943...). We cannot edit bergamot-translator's .gitmodules
+# from here (it is a separate, submodule-pinned repo), so an insteadOf rewrite
+# repoints the fetch URL whenever CMake's internal `git submodule update --init`
+# (bergamot-translator/CMakeLists.txt) resolves the marian-dev submodule.
+RUN git config --system url."https://github.com/cgeo/marian-dev".insteadOf "https://github.com/DavidVentura/marian-dev"
+
 RUN echo "sdk.dir=${ANDROID_SDK_ROOT}" > local.properties
 RUN chmod a+rw -R $CARGO_HOME/registry
 RUN mkdir /.gradle && chmod a+rw /.gradle

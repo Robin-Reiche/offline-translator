@@ -37,6 +37,15 @@ jobs:
           echo "tag=${{ github.event.inputs.tag || github.ref_name }}" >> "$GITHUB_OUTPUT"
           echo "Releasing as: ${{ github.event.inputs.tag || github.ref_name }}"
 
+      # bergamot-translator's .gitmodules pins the marian-dev submodule to
+      # commit 02b99943..., a fork-specific commit not reachable from any
+      # browsermt upstream ref. The cgeo fork (cgeo/marian-dev) anchors it
+      # with a tag. This insteadOf rewrite must be set before checkout so the
+      # recursive submodule fetch below resolves marian-dev from the cgeo
+      # fork instead of the no-longer-maintained DavidVentura/marian-dev.
+      - name: Redirect marian-dev submodule to cgeo fork
+        run: git config --global url."https://github.com/cgeo/marian-dev".insteadOf "https://github.com/DavidVentura/marian-dev"
+
       - name: Check out source at ${{ steps.tag.outputs.tag }}
         uses: actions/checkout@v4
         with:

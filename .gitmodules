@@ -3,4 +3,10 @@
 	url = https://github.com/CLD2Owners/cld2.git
 [submodule "app/bergamot/src/main/cpp/bergamot-translator"]
 	path = app/bergamot/src/main/cpp/bergamot-translator
-	url = https://github.com/DavidVentura/bergamot-translator.git
+	# Repointed to the cgeo fork. The pinned commit
+	# 29ad37b299f8d4a48f0ae0443366fe51d9a63f27 is a fork-specific commit that
+	# is not reachable from any branch/tag in the browsermt upstream; it only
+	# survived as a loose object in DavidVentura/bergamot-translator. The cgeo
+	# fork anchors it with a tag (pin_29ad37b2...), so the build no longer
+	# depends on that object surviving upstream garbage collection.
+	url = https://github.com/cgeo/bergamot-translator.git
