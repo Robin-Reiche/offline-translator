@@ -55,7 +55,11 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --de
 
 # Add Android targets for Rust
 RUN rustup target add aarch64-linux-android x86_64-linux-android armv7-linux-androideabi
-RUN cargo install cargo-ndk@4.1.2
+# --locked pins the dependency versions cargo-ndk 4.1.2 was released with.
+# Without it cargo resolves the newest compatible transitive deps, and since
+# icu_* 2.3.0 raised its MSRV to rustc 1.88 that no longer builds against the
+# 1.87.0 toolchain pinned above.
+RUN cargo install cargo-ndk@4.1.2 --locked
 # Set working directory
 WORKDIR /home/vagrant/build/dev.davidv.translator
 
