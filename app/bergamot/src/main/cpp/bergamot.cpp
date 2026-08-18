@@ -10,7 +10,29 @@
 #include "translator/utils.h"
 #include "third_party/cld2/public/compact_lang_det.h"
 #include <string>
+#include <csignal>
 using namespace marian::bergamot;
+
+// marian's setErrorHandlers() in 3rd_party/marian-dev/src/common/logging.cpp
+// registers process-wide SIGSEGV and SIGFPE handlers that call abort(). In a
+// command line tool that is helpful. Inside an Android app it is not: the
+// handler catches every native fault in the whole process, aborts, and the
+// tombstone then points at this library instead of at the code that actually
+// faulted. See cgeo/cgeo#18489.
+//
+// Those two calls are the only sigaction() calls in the entire library, so the
+// link is built with -Wl,--wrap=sigaction and both of them are refused here.
+// Everything else is passed through unchanged.
+extern "C" int __real_sigaction(int, const struct sigaction *, struct sigaction *);
+
+extern "C" __attribute__((visibility("hidden"))) int
+__wrap_sigaction(int signum, const struct sigaction *act, struct sigaction *oldact) {
+    if (act != nullptr && (signum == SIGSEGV || signum == SIGFPE)) {
+        // report success, marian ignores the return value anyway
+        return oldact ? __real_sigaction(signum, nullptr, oldact) : 0;
+    }
+    return __real_sigaction(signum, act, oldact);
+}
 
 #include <unordered_map>
 #include <mutex>

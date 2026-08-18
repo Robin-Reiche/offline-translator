@@ -108,3 +108,8 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
         log
         cld2
 )
+
+# Route every sigaction() reference inside this library through
+# __wrap_sigaction() in bergamot.cpp, so marian cannot install process-wide
+# SIGSEGV/SIGFPE handlers. See the comment there and cgeo/cgeo#18489.
+target_link_options(${CMAKE_PROJECT_NAME} PRIVATE "-Wl,--wrap=sigaction")
