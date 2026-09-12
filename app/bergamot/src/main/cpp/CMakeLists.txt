@@ -65,6 +65,15 @@ if (ANDROID_ABI STREQUAL "x86_64")
   # not expose AVX2.
   set(BUILD_ARCH "x86-64" CACHE STRING "Build architecture" FORCE)
 endif ()
+if (ANDROID_ABI STREQUAL "x86")
+  # Same for 32 bit x86. Without a pin BUILD_ARCH stays at its default
+  # "native", so the build machine's own CPU features end up in the .so.
+  # That is how AVX got into the shipped library and made it die with
+  # SIGILL in a static initializer on Atom based emulator images, which
+  # have no AVX. See cgeo/cgeo#18593. "core2" is the Android x86 ABI
+  # baseline, MMX through SSSE3 and nothing above it.
+  set(BUILD_ARCH "core2" CACHE STRING "Build architecture" FORCE)
+endif ()
 
 # marian-dev builds some other targets
 set(COMPILE_LIBRARY_ONLY ON CACHE BOOL "" FORCE)
